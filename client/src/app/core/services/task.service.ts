@@ -6,6 +6,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
     CreateTaskRequest,
+    PENDING_STATUS,
     Task,
     UpdateTaskRequest,
 } from '../models/task.model';
@@ -27,7 +28,7 @@ export class TaskService {
 
     readonly count = computed(() => this._tasks().length);
     readonly pendingCount = computed(
-        () => this._tasks().filter(t => t.status === 'ממתינה').length
+        () => this._tasks().filter(t => t.status === PENDING_STATUS).length
     );
 
     loadAll(): void {
@@ -76,7 +77,6 @@ export class TaskService {
         if (err.status === 0) {
             message = 'אין חיבור לשרת. בדקו שהשרת פועל ונסו שוב.';
         } else if (err.error?.errors) {
-            // ValidationProblemDetails מהשרת
             const errors = err.error.errors as Record<string, string[]>;
             message = Object.values(errors).flat().join(' ');
         } else if (err.error?.title) {

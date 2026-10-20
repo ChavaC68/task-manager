@@ -1,145 +1,147 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  input,
-  output,
-  signal,
+    ChangeDetectionStrategy,
+    Component,
+    effect,
+    inject,
+    input,
+    output,
+    signal,
 } from '@angular/core';
 import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
+    FormBuilder,
+    ReactiveFormsModule,
+    Validators,
 } from '@angular/forms';
 
 import {
-  CreateTaskRequest,
-  Task,
-  TASK_PRIORITIES,
-  TASK_STATUSES,
+    CreateTaskRequest,
+    DEFAULT_PRIORITY,
+    DEFAULT_STATUS,
+    Task,
+    TASK_PRIORITIES,
+    TASK_STATUSES,
 } from '../../../core/models/task.model';
 import { TaskService } from '../../../core/services/task.service';
 
 @Component({
-  selector: 'app-task-form',
-  standalone: true,
-  imports: [ReactiveFormsModule],
-  templateUrl: './task-form.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-task-form',
+    standalone: true,
+    imports: [ReactiveFormsModule],
+    templateUrl: './task-form.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskFormComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly taskService = inject(TaskService);
+    private readonly fb = inject(FormBuilder);
+    private readonly taskService = inject(TaskService);
 
-  readonly editingTask = input<Task | null>(null);
+    readonly editingTask = input<Task | null>(null);
 
-  readonly saved = output<void>();
-  readonly cancelled = output<void>();
+    readonly saved = output<void>();
+    readonly cancelled = output<void>();
 
-  readonly priorities = TASK_PRIORITIES;
-  readonly statuses = TASK_STATUSES;
+    readonly priorities = TASK_PRIORITIES;
+    readonly statuses = TASK_STATUSES;
 
-  readonly submitting = signal(false);
-  readonly serverError = signal<string | null>(null);
+    readonly submitting = signal(false);
+    readonly serverError = signal<string | null>(null);
 
-  readonly isEditMode = () => this.editingTask() !== null;
+    readonly isEditMode = () => this.editingTask() !== null;
 
-  readonly form = this.fb.nonNullable.group({
-    title: ['', [Validators.required, Validators.maxLength(200)]],
-    description: [''],
-    priority: ['בינונית' as string, [Validators.required]],
-    dueDate: ['', [Validators.required]],
-    status: ['ממתינה' as string, [Validators.required]],
-  });
-
-  constructor() {
-    effect(() => {
-      const task = this.editingTask();
-      this.serverError.set(null);
-
-      if (task) {
-        this.form.setValue({
-          title: task.title,
-          description: task.description ?? '',
-          priority: task.priority,
-          dueDate: task.dueDate,
-          status: task.status,
-        });
-      } else {
-        this.form.reset({
-          title: '',
-          description: '',
-          priority: 'בינונית',
-          dueDate: '',
-          status: 'ממתינה',
-        });
-      }
+    readonly form = this.fb.nonNullable.group({
+        title: ['', [Validators.required, Validators.maxLength(200)]],
+        description: [''],
+        priority: [DEFAULT_PRIORITY as string, [Validators.required]],
+        dueDate: ['', [Validators.required]],
+        status: [DEFAULT_STATUS as string, [Validators.required]],
     });
-  }
 
-  get title() { return this.form.controls.title; }
-  get description() { return this.form.controls.description; }
-  get priority() { return this.form.controls.priority; }
-  get dueDate() { return this.form.controls.dueDate; }
-  get status() { return this.form.controls.status; }
+    constructor() {
+        effect(() => {
+            const task = this.editingTask();
+            this.serverError.set(null);
 
-  showError(controlName: keyof typeof this.form.controls): boolean {
-    const control = this.form.controls[controlName];
-    return control.invalid && (control.touched || control.dirty);
-  }
-
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
+            if (task) {
+                this.form.setValue({
+                    title: task.title,
+                    description: task.description ?? '',
+                    priority: task.priority,
+                    dueDate: task.dueDate,
+                    status: task.status,
+                });
+            } else {
+                this.form.reset({
+                    title: '',
+                    description: '',
+                    priority: DEFAULT_PRIORITY,
+                    dueDate: '',
+                    status: DEFAULT_STATUS,
+                });
+            }
+        });
     }
 
-    this.submitting.set(true);
-    this.serverError.set(null);
+    get title() { return this.form.controls.title; }
+    get description() { return this.form.controls.description; }
+    get priority() { return this.form.controls.priority; }
+    get dueDate() { return this.form.controls.dueDate; }
+    get status() { return this.form.controls.status; }
 
-    const raw = this.form.getRawValue();
-    const request: CreateTaskRequest = {
-      title: raw.title.trim(),
-      description: raw.description.trim() || null,
-      priority: raw.priority as CreateTaskRequest['priority'],
-      dueDate: raw.dueDate,
-      status: raw.status as CreateTaskRequest['status'],
-    };
+    showError(controlName: keyof typeof this.form.controls): boolean {
+        const control = this.form.controls[controlName];
+        return control.invalid && (control.touched || control.dirty);
+    }
 
-    const editing = this.editingTask();
-    const operation = editing
-      ? this.taskService.update(editing.id, request)
-      : this.taskService.create(request);
-
-    operation.subscribe({
-      next: () => {
-        this.submitting.set(false);
-        if (!editing) {
-          this.resetForm();
+    onSubmit(): void {
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
         }
-        this.saved.emit();
-      },
-      error: () => {
-        this.submitting.set(false);
-        this.serverError.set(this.taskService.error());
-      },
-    });
-  }
 
-  onCancel(): void {
-    this.resetForm();
-    this.cancelled.emit();
-  }
+        this.submitting.set(true);
+        this.serverError.set(null);
 
-  private resetForm(): void {
-    this.form.reset({
-      title: '',
-      description: '',
-      priority: 'בינונית',
-      dueDate: '',
-      status: 'ממתינה',
-    });
-    this.serverError.set(null);
-  }
+        const raw = this.form.getRawValue();
+        const request: CreateTaskRequest = {
+            title: raw.title.trim(),
+            description: raw.description.trim() || null,
+            priority: raw.priority as CreateTaskRequest['priority'],
+            dueDate: raw.dueDate,
+            status: raw.status as CreateTaskRequest['status'],
+        };
+
+        const editing = this.editingTask();
+        const operation = editing
+            ? this.taskService.update(editing.id, request)
+            : this.taskService.create(request);
+
+        operation.subscribe({
+            next: () => {
+                this.submitting.set(false);
+                if (!editing) {
+                    this.resetForm();
+                }
+                this.saved.emit();
+            },
+            error: () => {
+                this.submitting.set(false);
+                this.serverError.set(this.taskService.error());
+            },
+        });
+    }
+
+    onCancel(): void {
+        this.resetForm();
+        this.cancelled.emit();
+    }
+
+    private resetForm(): void {
+        this.form.reset({
+            title: '',
+            description: '',
+            priority: DEFAULT_PRIORITY,
+            dueDate: '',
+            status: DEFAULT_STATUS,
+        });
+        this.serverError.set(null);
+    }
 }

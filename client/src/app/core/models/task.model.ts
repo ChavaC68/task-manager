@@ -4,12 +4,17 @@ export type TaskPriority = typeof TASK_PRIORITIES[number];
 export const TASK_STATUSES = ['ממתינה', 'בתהליך', 'הושלמה'] as const;
 export type TaskStatus = typeof TASK_STATUSES[number];
 
+export const DEFAULT_PRIORITY: TaskPriority = 'בינונית';
+export const DEFAULT_STATUS: TaskStatus = 'ממתינה';
+
+export const PENDING_STATUS: TaskStatus = 'ממתינה';
+
 export interface Task {
   id: number;
   title: string;
   description: string | null;
   priority: TaskPriority;
-  dueDate: string; // yyyy-MM-dd
+  dueDate: string;
   status: TaskStatus;
 }
 
