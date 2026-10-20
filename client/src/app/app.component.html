@@ -5,12 +5,10 @@
   </header>
 
   <div class="row g-4">
-    <!-- טופס -->
     <div class="col-12 col-lg-5">
       <app-task-form [editingTask]="editingTask()" (saved)="onFormSaved()" (cancelled)="onEditCancelled()" />
     </div>
 
-    <!-- רשימה -->
     <div class="col-12 col-lg-7">
       <app-task-list [tasks]="taskService.tasks()" [loading]="taskService.loading()" [error]="taskService.loadError()"
         (edit)="onEditRequested($event)" (remove)="onDeleteRequested($event)" />

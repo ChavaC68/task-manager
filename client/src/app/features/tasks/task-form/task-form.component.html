@@ -12,7 +12,6 @@
     <div class="card-body">
         <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
-            <!-- כותרת -->
             <div class="mb-3">
                 <label for="title" class="form-label">כותרת המשימה <span class="text-danger">*</span></label>
                 <input id="title" type="text" class="form-control" formControlName="title"
@@ -28,13 +27,11 @@
                 }
             </div>
 
-            <!-- תיאור -->
             <div class="mb-3">
                 <label for="description" class="form-label">תיאור</label>
                 <textarea id="description" rows="3" class="form-control" formControlName="description"></textarea>
             </div>
 
-            <!-- עדיפות + סטטוס -->
             <div class="row g-3 mb-3">
                 <div class="col-12 col-sm-6">
                     <label for="priority" class="form-label">עדיפות <span class="text-danger">*</span></label>
@@ -63,7 +60,6 @@
                 </div>
             </div>
 
-            <!-- תאריך יעד -->
             <div class="mb-3">
                 <label for="dueDate" class="form-label">תאריך יעד <span class="text-danger">*</span></label>
                 <input id="dueDate" type="date" class="form-control" formControlName="dueDate"
@@ -79,7 +75,6 @@
             </div>
             }
 
-            <!-- כפתורים -->
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary" [disabled]="submitting()">
                     @if (submitting()) {

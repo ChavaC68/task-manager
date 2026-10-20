@@ -2,9 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 
 import { PRIORITY_BADGE, STATUS_BADGE, Task } from '../../../core/models/task.model';
 
-/**
- * כרטיס משימה בודד. תצוגה בלבד — מדווח על עריכה/מחיקה להורה.
- */
 @Component({
   selector: 'app-task-item',
   standalone: true,
@@ -25,7 +22,6 @@ export class TaskItemComponent {
     () => `badge rounded-pill ${STATUS_BADGE[this.task().status]}`
   );
 
-  /** תצוגת תאריך בפורמט dd/MM/yyyy. */
   readonly formattedDueDate = computed(() => {
     const due = this.task().dueDate;
     if (!due) return '';

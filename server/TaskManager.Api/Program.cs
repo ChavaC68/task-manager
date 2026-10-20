@@ -6,9 +6,6 @@ using TaskManager.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------- שירותים ----------
-
-// Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -20,7 +17,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// CORS — מאפשר ל-Angular (localhost:4200) לפנות לשרת מהדפדפן
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -29,18 +25,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-// FluentValidation — סורק את ה-Assembly ורושם אוטומטית את כל הוולדטורים
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-// DI — Repository ו-Service דרך interfaces בלבד
 builder.Services.AddSingleton<ITaskRepository, JsonTaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 
-// ---------- Pipeline ----------
 
 var app = builder.Build();
 
-// ראשון בתור — תופס כל חריגה בהמשך השרשרת
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())

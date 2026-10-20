@@ -3,7 +3,6 @@ using TaskManager.Api.Models.Dtos;
 
 namespace TaskManager.Api.Validators;
 
-/// <summary>ולידציה לגוף בקשת עדכון משימה.</summary>
 public class UpdateTaskRequestValidator : AbstractValidator<UpdateTaskRequest>
 {
     private static readonly string[] AllowedPriorities = { "נמוכה", "בינונית", "גבוהה" };
@@ -24,8 +23,6 @@ public class UpdateTaskRequestValidator : AbstractValidator<UpdateTaskRequest>
             .NotEmpty().WithMessage("עדיפות המשימה היא שדה חובה.")
             .Must(AllowedPriorities.Contains).WithMessage("עדיפות המשימה אינה חוקית.");
 
-        // בעדכון — בודקים פורמט, אך לא אוסרים תאריך בעבר:
-        // תיקון/עיכוב של משימה קיימת הוא מצב לגיטימי.
         RuleFor(x => x.DueDate)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("תאריך היעד הוא שדה חובה.")

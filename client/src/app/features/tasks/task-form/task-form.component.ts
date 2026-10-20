@@ -21,10 +21,6 @@ import {
 } from '../../../core/models/task.model';
 import { TaskService } from '../../../core/services/task.service';
 
-/**
- * טופס יצירה/עריכה של משימה.
- * מצב עריכה נקבע על ידי הקלט `editingTask` (null = יצירה).
- */
 @Component({
   selector: 'app-task-form',
   standalone: true,
@@ -36,10 +32,8 @@ export class TaskFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly taskService = inject(TaskService);
 
-  /** המשימה שנערכת — null במצב יצירה. */
   readonly editingTask = input<Task | null>(null);
 
-  /** אירועים להורה. */
   readonly saved = output<void>();
   readonly cancelled = output<void>();
 
@@ -60,8 +54,6 @@ export class TaskFormComponent {
   });
 
   constructor() {
-    // כשמגיעה משימה לעריכה — טוענים אותה לטופס.
-    // כשהיא מתאפסת ל-null — מנקים את הטופס.
     effect(() => {
       const task = this.editingTask();
       this.serverError.set(null);
@@ -86,14 +78,12 @@ export class TaskFormComponent {
     });
   }
 
-  // --- גישה נוחה לשדות ב-template ---
   get title() { return this.form.controls.title; }
   get description() { return this.form.controls.description; }
   get priority() { return this.form.controls.priority; }
   get dueDate() { return this.form.controls.dueDate; }
   get status() { return this.form.controls.status; }
 
-  /** האם להציג שגיאה לשדה: נגעו בו או שהטופס נשלח. */
   showError(controlName: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[controlName];
     return control.invalid && (control.touched || control.dirty);

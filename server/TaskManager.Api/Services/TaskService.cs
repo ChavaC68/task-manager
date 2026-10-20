@@ -5,10 +5,6 @@ using TaskManager.Api.Repositories;
 
 namespace TaskManager.Api.Services;
 
-/// <summary>
-/// לוגיקה עסקית של משימות.
-/// תלוי בחוזה Repository בלבד — לא במימוש.
-/// </summary>
 public class TaskService : ITaskService
 {
     private readonly ITaskRepository _repository;
@@ -50,7 +46,7 @@ public class TaskService : ITaskService
         var existing = await _repository.GetByIdAsync(id);
         if (existing is null)
         {
-            return null; // ה-Endpoint יהפוך זה ל-404
+            return null;
         }
 
         existing.Title = request.Title.Trim();
@@ -71,7 +67,6 @@ public class TaskService : ITaskService
 
     public Task<bool> DeleteAsync(int id) => _repository.DeleteAsync(id);
 
-    // ---------- מיפוי ----------
 
     private static TaskDto MapToDto(TaskItem item) => new(
         item.Id,
@@ -87,7 +82,6 @@ public class TaskService : ITaskService
     private static DateOnly ParseDueDate(string value) =>
         DateOnly.ParseExact(value, DateFormat, CultureInfo.InvariantCulture);
 
-    // ---------- תרגום עברית <-> enum ----------
 
     private static TaskPriority ParsePriority(string value) => value.Trim() switch
     {

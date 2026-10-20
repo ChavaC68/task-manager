@@ -15,29 +15,24 @@ import { TaskListComponent } from './features/tasks/task-list/task-list.componen
 export class AppComponent implements OnInit {
   readonly taskService = inject(TaskService);
 
-  /** המשימה שנערכת כרגע — null = מצב יצירה. */
   readonly editingTask = signal<Task | null>(null);
 
   ngOnInit(): void {
     this.taskService.loadAll();
   }
 
-  /** לחיצה על עיפרון ברשימה — טוען את המשימה לטופס. */
   onEditRequested(task: Task): void {
     this.editingTask.set(task);
   }
 
-  /** הטופס הסתיים (יצירה או עדכון) — חוזרים למצב יצירה. */
   onFormSaved(): void {
     this.editingTask.set(null);
   }
 
-  /** ביטול עריכה — חוזרים למצב יצירה. */
   onEditCancelled(): void {
     this.editingTask.set(null);
   }
 
-  /** מחיקת משימה — אם היא הייתה בעריכה, מבטלים את העריכה. */
   onDeleteRequested(id: number): void {
     this.taskService.delete(id).subscribe({
       next: () => {

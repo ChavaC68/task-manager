@@ -3,10 +3,6 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { Task } from '../../../core/models/task.model';
 import { TaskItemComponent } from '../task-item/task-item.component';
 
-/**
- * רשימת המשימות — תצוגה בלבד.
- * מקבלת את הנתונים כ-inputs ומחזירה אירועים להורה.
- */
 @Component({
   selector: 'app-task-list',
   standalone: true,

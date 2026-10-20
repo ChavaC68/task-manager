@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TaskManager.Api.Middleware;
 
-/// <summary>
-/// מיירט חריגות שלא טופלו ומחזיר תגובת ProblemDetails אחידה (RFC 7807).
-/// לא חושף פרטים פנימיים ללקוח.
-/// </summary>
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
@@ -26,7 +22,6 @@ public class ExceptionHandlingMiddleware
         }
         catch (BadHttpRequestException ex)
         {
-            // גוף בקשה שאינו תקין (למשל JSON שבור) — שגיאת לקוח, לא תקלת שרת.
             _logger.LogWarning(ex, "Malformed request on {Method} {Path}",
                 context.Request.Method, context.Request.Path);
 
@@ -49,10 +44,8 @@ public class ExceptionHandlingMiddleware
         }
     }
 
-    /// <summary>כותב תגובת ProblemDetails אחידה, אם התגובה טרם החלה להישלח.</summary>
     private static async Task WriteProblemAsync(HttpContext context, int status, string title, string detail)
     {
-        // אם התגובה כבר החלה — אין אפשרות לשנות אותה.
         if (context.Response.HasStarted)
         {
             return;

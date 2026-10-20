@@ -1,6 +1,5 @@
 namespace TaskManager.Api.Models.Entities;
 
-/// <summary>ישות המשימה — המודל הפנימי של הדומיין.</summary>
 public class TaskItem
 {
     public int Id { get; set; }

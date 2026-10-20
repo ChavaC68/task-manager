@@ -1,4 +1,3 @@
-# ===== .NET =====
 bin/
 obj/
 *.user
@@ -9,7 +8,6 @@ obj/
 *.cache
 .vs/
 
-# ===== Node / Angular =====
 node_modules/
 dist/
 .angular/
@@ -17,13 +15,11 @@ dist/
 npm-debug.log*
 yarn-error.log*
 
-# ===== VS Code — הגדרות אישיות לא, קבצי המלצה כן =====
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
 
-# ===== OS =====
 .DS_Store
 Thumbs.db
 desktop.ini

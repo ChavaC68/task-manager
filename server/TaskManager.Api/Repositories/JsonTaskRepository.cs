@@ -4,24 +4,19 @@ using TaskManager.Api.Models.Entities;
 
 namespace TaskManager.Api.Repositories;
 
-/// <summary>
-/// מימוש ITaskRepository על גבי קובץ JSON.
-/// הנתונים נטענים לקריאה, כל שינוי נכתב חזרה לקובץ.
-/// </summary>
 public class JsonTaskRepository : ITaskRepository
 {
     private readonly string _filePath;
     private readonly ILogger<JsonTaskRepository> _logger;
 
-    // מונע גישה מקבילה לקובץ — שתי בקשות במקביל לא יכתבו בו-זמנית (corruption).
     private readonly SemaphoreSlim _lock = new(1, 1);
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        WriteIndented = true,                        // קובץ קריא בעין
-        PropertyNameCaseInsensitive = true,          // "Title" או "title" — לא משנה
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase, // כתיבה camelCase, תואם לחוזה
-        Converters = { new JsonStringEnumConverter() }     // enum כמחרוזת, לא כמספר
+        WriteIndented = true,
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public JsonTaskRepository(IWebHostEnvironment env, ILogger<JsonTaskRepository> logger)
@@ -113,7 +108,6 @@ public class JsonTaskRepository : ITaskRepository
         }
     }
 
-    // ---- עזר פרטי ----
 
     private async Task<List<TaskItem>> ReadAllInternalAsync()
     {

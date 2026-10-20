@@ -10,36 +10,26 @@ import {
     UpdateTaskRequest,
 } from '../models/task.model';
 
-/**
- * שירות המשימות — המקור היחיד לאמת על המשימות.
- * מחזיק את ה-state כ-Signals, ומבצע את כל קריאות ה-HTTP.
- */
 @Injectable({ providedIn: 'root' })
 export class TaskService {
     private readonly http = inject(HttpClient);
     private readonly apiUrl = `${environment.apiUrl}/tasks`;
 
-    // --- State ---
     private readonly _tasks = signal<Task[]>([]);
     private readonly _loading = signal(false);
     private readonly _error = signal<string | null>(null);
     private readonly _loadError = signal<string | null>(null);
 
-    // --- חשיפה לקריאה בלבד ---
     readonly tasks = this._tasks.asReadonly();
     readonly loading = this._loading.asReadonly();
-    /** שגיאת הפעולה האחרונה (לשימוש הטופס). */
     readonly error = this._error.asReadonly();
-    /** שגיאת טעינה של הרשימה (לשימוש הרשימה בלבד). */
     readonly loadError = this._loadError.asReadonly();
 
-    // --- נגזרות ---
     readonly count = computed(() => this._tasks().length);
     readonly pendingCount = computed(
         () => this._tasks().filter(t => t.status === 'ממתינה').length
     );
 
-    // --- קריאה ---
     loadAll(): void {
         this._loading.set(true);
         this._loadError.set(null);
@@ -55,7 +45,6 @@ export class TaskService {
             });
     }
 
-    // --- יצירה ---
     create(request: CreateTaskRequest): Observable<Task> {
         return this.http.post<Task>(this.apiUrl, request).pipe(
             tap(created => this._tasks.update(list => [...list, created])),
@@ -63,7 +52,6 @@ export class TaskService {
         );
     }
 
-    // --- עדכון ---
     update(id: number, request: UpdateTaskRequest): Observable<Task> {
         return this.http.put<Task>(`${this.apiUrl}/${id}`, request).pipe(
             tap(updated =>
@@ -75,7 +63,6 @@ export class TaskService {
         );
     }
 
-    // --- מחיקה ---
     delete(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
             tap(() => this._tasks.update(list => list.filter(t => t.id !== id))),
@@ -83,7 +70,6 @@ export class TaskService {
         );
     }
 
-    // --- טיפול בשגיאות ---
     private handleError(err: HttpErrorResponse, fallback: string): Observable<never> {
         let message = fallback;
 
