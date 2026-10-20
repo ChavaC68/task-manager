@@ -1,0 +1,19 @@
+<div class="container py-4">
+  <header class="text-center mb-4">
+    <h1 class="h3 mb-1">ניהול משימות</h1>
+    <p class="text-muted mb-0">הוספה, עריכה ומעקב אחר משימות</p>
+  </header>
+
+  <div class="row g-4">
+    <!-- טופס -->
+    <div class="col-12 col-lg-5">
+      <app-task-form [editingTask]="editingTask()" (saved)="onFormSaved()" (cancelled)="onEditCancelled()" />
+    </div>
+
+    <!-- רשימה -->
+    <div class="col-12 col-lg-7">
+      <app-task-list [tasks]="taskService.tasks()" [loading]="taskService.loading()" [error]="taskService.loadError()"
+        (edit)="onEditRequested($event)" (remove)="onDeleteRequested($event)" />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-white text-center">
+        <h2 class="h6 mb-0">
+            @if (isEditMode()) {
+            עריכת משימה
+            } @else {
+            הוספת משימה
+            }
+        </h2>
+    </div>
+
+    <div class="card-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- כותרת -->
+            <div class="mb-3">
+                <label for="title" class="form-label">כותרת המשימה <span class="text-danger">*</span></label>
+                <input id="title" type="text" class="form-control" formControlName="title"
+                    [class.is-invalid]="showError('title')" />
+                @if (showError('title')) {
+                <div class="invalid-feedback d-block">
+                    @if (title.hasError('required')) {
+                    כותרת המשימה היא שדה חובה.
+                    } @else if (title.hasError('maxlength')) {
+                    כותרת המשימה לא תעלה על 200 תווים.
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- תיאור -->
+            <div class="mb-3">
+                <label for="description" class="form-label">תיאור</label>
+                <textarea id="description" rows="3" class="form-control" formControlName="description"></textarea>
+            </div>
+
+            <!-- עדיפות + סטטוס -->
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6">
+                    <label for="priority" class="form-label">עדיפות <span class="text-danger">*</span></label>
+                    <select id="priority" class="form-select" formControlName="priority"
+                        [class.is-invalid]="showError('priority')">
+                        @for (p of priorities; track p) {
+                        <option [value]="p">{{ p }}</option>
+                        }
+                    </select>
+                    @if (showError('priority')) {
+                    <div class="invalid-feedback d-block">בחרו עדיפות.</div>
+                    }
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <label for="status" class="form-label">סטטוס <span class="text-danger">*</span></label>
+                    <select id="status" class="form-select" formControlName="status"
+                        [class.is-invalid]="showError('status')">
+                        @for (s of statuses; track s) {
+                        <option [value]="s">{{ s }}</option>
+                        }
+                    </select>
+                    @if (showError('status')) {
+                    <div class="invalid-feedback d-block">בחרו סטטוס.</div>
+                    }
+                </div>
+            </div>
+
+            <!-- תאריך יעד -->
+            <div class="mb-3">
+                <label for="dueDate" class="form-label">תאריך יעד <span class="text-danger">*</span></label>
+                <input id="dueDate" type="date" class="form-control" formControlName="dueDate"
+                    [class.is-invalid]="showError('dueDate')" />
+                @if (showError('dueDate')) {
+                <div class="invalid-feedback d-block">תאריך היעד הוא שדה חובה.</div>
+                }
+            </div>
+
+            @if (serverError()) {
+            <div class="alert alert-danger py-2 mb-3" role="alert">
+                {{ serverError() }}
+            </div>
+            }
+
+            <!-- כפתורים -->
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+                    @if (submitting()) {
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    שומר...
+                    } @else {
+                    @if (isEditMode()) {
+                    עדכון
+                    } @else {
+                    שמירה
+                    }
+                    }
+                </button>
+
+                @if (isEditMode()) {
+                <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+                    ביטול
+                </button>
+                }
+            </div>
+
+        </form>
+    </div>
+</div>

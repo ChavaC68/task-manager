@@ -1,0 +1,112 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+
+import { environment } from '../../../environments/environment';
+import {
+    CreateTaskRequest,
+    Task,
+    UpdateTaskRequest,
+} from '../models/task.model';
+
+/**
+ * שירות המשימות — המקור היחיד לאמת על המשימות.
+ * מחזיק את ה-state כ-Signals, ומבצע את כל קריאות ה-HTTP.
+ */
+@Injectable({ providedIn: 'root' })
+export class TaskService {
+    private readonly http = inject(HttpClient);
+    private readonly apiUrl = `${environment.apiUrl}/tasks`;
+
+    // --- State ---
+    private readonly _tasks = signal<Task[]>([]);
+    private readonly _loading = signal(false);
+    private readonly _error = signal<string | null>(null);
+    private readonly _loadError = signal<string | null>(null);
+
+    // --- חשיפה לקריאה בלבד ---
+    readonly tasks = this._tasks.asReadonly();
+    readonly loading = this._loading.asReadonly();
+    /** שגיאת הפעולה האחרונה (לשימוש הטופס). */
+    readonly error = this._error.asReadonly();
+    /** שגיאת טעינה של הרשימה (לשימוש הרשימה בלבד). */
+    readonly loadError = this._loadError.asReadonly();
+
+    // --- נגזרות ---
+    readonly count = computed(() => this._tasks().length);
+    readonly pendingCount = computed(
+        () => this._tasks().filter(t => t.status === 'ממתינה').length
+    );
+
+    // --- קריאה ---
+    loadAll(): void {
+        this._loading.set(true);
+        this._loadError.set(null);
+
+        this.http.get<Task[]>(this.apiUrl)
+            .pipe(
+                tap(tasks => this._tasks.set(tasks)),
+                catchError(err => this.handleLoadError(err))
+            )
+            .subscribe({
+                next: () => this._loading.set(false),
+                error: () => this._loading.set(false),
+            });
+    }
+
+    // --- יצירה ---
+    create(request: CreateTaskRequest): Observable<Task> {
+        return this.http.post<Task>(this.apiUrl, request).pipe(
+            tap(created => this._tasks.update(list => [...list, created])),
+            catchError(err => this.handleError(err, 'יצירת המשימה נכשלה.'))
+        );
+    }
+
+    // --- עדכון ---
+    update(id: number, request: UpdateTaskRequest): Observable<Task> {
+        return this.http.put<Task>(`${this.apiUrl}/${id}`, request).pipe(
+            tap(updated =>
+                this._tasks.update(list =>
+                    list.map(t => (t.id === updated.id ? updated : t))
+                )
+            ),
+            catchError(err => this.handleError(err, 'עדכון המשימה נכשל.'))
+        );
+    }
+
+    // --- מחיקה ---
+    delete(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+            tap(() => this._tasks.update(list => list.filter(t => t.id !== id))),
+            catchError(err => this.handleError(err, 'מחיקת המשימה נכשלה.'))
+        );
+    }
+
+    // --- טיפול בשגיאות ---
+    private handleError(err: HttpErrorResponse, fallback: string): Observable<never> {
+        let message = fallback;
+
+        if (err.status === 0) {
+            message = 'אין חיבור לשרת. בדקו שהשרת פועל ונסו שוב.';
+        } else if (err.error?.errors) {
+            // ValidationProblemDetails מהשרת
+            const errors = err.error.errors as Record<string, string[]>;
+            message = Object.values(errors).flat().join(' ');
+        } else if (err.error?.title) {
+            message = err.error.title;
+        }
+
+        this._error.set(message);
+        return throwError(() => err);
+    }
+
+    private handleLoadError(err: HttpErrorResponse): Observable<never> {
+        this._loadError.set(
+            err.status === 0
+                ? 'אין חיבור לשרת. בדקו שהשרת פועל ונסו שוב.'
+                : 'טעינת המשימות נכשלה.'
+        );
+        return throwError(() => err);
+    }
+}
